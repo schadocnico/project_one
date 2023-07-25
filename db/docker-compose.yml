@@ -1,0 +1,19 @@
+version: '3'
+services:
+  mysqldb:
+    image: mysql:8.0
+    restart: always
+    container_name: cms-mysql
+    command:
+        [
+            "--character-set-server=utf8mb4",
+            "--collation-server=utf8mb4_unicode_ci",
+            "--default-authentication-plugin=mysql_native_password",
+        ]
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=db
+    ports:
+      - "127.0.0.1:3307:3306"
+    volumes:
+      - ./db/scripts:/docker-entrypoint-initdb.d:rw

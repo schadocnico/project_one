@@ -1,0 +1,19 @@
+version: '3'
+services:
+  api:
+    build: .
+    container_name: cms-backend
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      MYSQL_DATABASE: 'db'
+      MYSQL_USER: 'root'
+      MYSQL_PASSWORD: 'root'
+      MYSQL_HOST: host.docker.internal
+      MYSQL_PORT: 3307
+      CORS_PORT: '8080'
+      CORS_ORIGIN: host.docker.internal
+      API_PORT: '8081'
+
+  
