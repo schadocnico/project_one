@@ -1,0 +1,53 @@
+version: '3'
+
+services:
+  reverseproxy:
+    image: nginx:1.25.1
+    container_name: nginxrp
+    depends_on:
+      - api
+      - mysqldb
+    volumes:
+      - ./nginx/core.conf:/etc/nginx/conf.d/core.conf
+      - ./nginx/reverseproxy.conf:/etc/nginx/conf.d/reverseproxy.conf
+      - ./nginx/db1.conf:/etc/nginx/conf.d/db1.conf
+      - ./nginx/api1.conf:/etc/nginx/conf.d/api1.conf
+      - ./nginx/html:/var/www/html
+    ports:
+      - "80:80"
+      - "443:443"
+  api:
+    build: ./api/
+    container_name: backend
+    restart: always
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mysqldb
+    environment:
+      MYSQL_DATABASE: 'db'
+      MYSQL_USER: 'root'
+      MYSQL_PASSWORD: 'root'
+      MYSQL_HOST: host.docker.internal
+      MYSQL_PORT: 3307
+      CORS_PORT: '8080'
+      CORS_ORIGIN: host.docker.internal
+      API_PORT: '8081'
+    
+  mysqldb:
+    image: mysql:8.0
+    restart: always
+    container_name: mysql
+    command:
+        [
+            "--character-set-server=utf8mb4",
+            "--collation-server=utf8mb4_unicode_ci",
+            "--default-authentication-plugin=mysql_native_password",
+        ]
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=db
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./db/scripts:/docker-entrypoint-initdb.d:rw
