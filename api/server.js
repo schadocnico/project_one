@@ -33,6 +33,7 @@ function tryDatabaseConnection() {
     })
     .catch((err) => {
       console.error("Failed to connect to the database: " + err.message);
+      console.log(db.sequelize);
       setTimeout(tryDatabaseConnection, 5000); // Nouvelle tentative après 5 secondes
     });
 }

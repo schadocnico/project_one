@@ -6,7 +6,7 @@ services:
     container_name: nginxrp
     depends_on:
       - api
-      - mysqldb
+      - database
     volumes:
       - ./nginx/core.conf:/etc/nginx/conf.d/core.conf
       - ./nginx/reverseproxy.conf:/etc/nginx/conf.d/reverseproxy.conf
@@ -23,31 +23,32 @@ services:
     ports:
       - "8081:8081"
     depends_on:
-      - mysqldb
+      - database
     environment:
-      MYSQL_DATABASE: 'db'
-      MYSQL_USER: 'root'
-      MYSQL_PASSWORD: 'root'
-      MYSQL_HOST: host.docker.internal
-      MYSQL_PORT: 3307
+      DB_USER: 'postgres'
+      DB_PASSWORD: 'example'
+      DB_PORT: '3007'
+      DB_NAME: 'example'
+      DB_HOST: host.docker.internal
       CORS_PORT: '8080'
       CORS_ORIGIN: host.docker.internal
       API_PORT: '8081'
     
-  mysqldb:
-    image: mysql:8.0
+  database:
+    image: postgres:16.2
     restart: always
-    container_name: mysql
-    command:
-        [
-            "--character-set-server=utf8mb4",
-            "--collation-server=utf8mb4_unicode_ci",
-            "--default-authentication-plugin=mysql_native_password",
-        ]
-    environment:
-      - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_DATABASE=db
-    ports:
-      - "3307:3306"
+    user: postgres
     volumes:
-      - ./db/scripts:/docker-entrypoint-initdb.d:rw
+      - db-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=example
+      - POSTGRES_PASSWORD=example
+    ports:
+      - 3007:5432
+    healthcheck:
+      test: [ "CMD", "pg_isready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+volumes:
+  db-data:
